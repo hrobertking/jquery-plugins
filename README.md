@@ -15,6 +15,7 @@ Creates a sorted (and sortable) table directly from markup, enabling the develop
 #### Syntax:
 *object* $(*selector*).sortedtable([*object* sortOn:*object[]* sortkeys])
 
+##### Properties
 - ***object* *instance*.body**: The table body
 - ***integer* *instance*.colCount**: The count of columns in the table
 - ***object[]* *instance*.cols**: Names of columns in the table, defaults to col_{index}
@@ -22,8 +23,9 @@ Creates a sorted (and sortable) table directly from markup, enabling the develop
 - ***string* *instance*.foot**: The table footer
 - ***string* *instance*.head**: The table header
 - ***node* *instance*.elem**: jQuery element reference to table
-- ***object[]* *instance*.sorts**: Sort keys. Each object in the array contains 'name' and 'dir', which is 1 (ascending) or -1 (descending)
 
+##### Methods
+- ***object[]* *instance*.sorts**: Sort keys. Each object in the array contains 'name' and 'dir', which is 1 (ascending) or -1 (descending)
 - ***void* *instance*.clearSort**: Clears the sort keys
 - ***void* *instance*.getSortAttribute**: Sets the object array containing sort keys using the data-sort attribute of the table
 - ***void* *instance*.setSortAttribute**: Sets the data-sort attribute on the table using the sort keys
