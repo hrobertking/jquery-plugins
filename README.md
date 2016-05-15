@@ -13,7 +13,7 @@ Each library is documented, and none are minified. If you want a minified versio
 Creates a sorted (and sortable) table directly from markup, enabling the developer to maintain their *progressive enhancement* practice. The sort order may be specified either in the markup, using a `data-sort` attribute on the table, or in the script call. The first column is set in the sort order by a click on the column header. Columns can be added to the sort order with a shift+click. Clicking a column already in the sort order toggles the sort order between ascending and descending.
 
 #### Syntax:
-*object* $(*selector*).sortedtable([*object* sortOn:*object[]* sortkeys])
+*object* $(*selector*).sortedtable([*object[]* sortkeys])
 
 ##### Properties
 - ***object* *instance*.body**: The table body
@@ -32,11 +32,11 @@ Creates a sorted (and sortable) table directly from markup, enabling the develop
 - ***void* *instance*.sort([*object[]* sortOn[, *boolean* retain]])**: Sorts the data in the table body using the sort keys provided in the data-sort attribute of the table and the <em>sortOn</em> object array (each object in the array should contain a 'name' and 'dir' property, see `*instance*.sorts`), retaining the existing sort order if <em>retain</em> is specified.
 - ***string* *instance*.toHtml([*boolean* bodyOnly])**: Returns the complete table, or the table body only (without header and footer), as a string.
 
-Examples:
+##### Examples
 - var airports = $('#airports').sortedtable({sortOn:[{name:'Country', dir:'ascending'}, {name:'City', dir:1}]});
 
 #### Requires:
 - jquery
 
 #### Demo:
-Coming soon.
+- [The Cathmhaol](http://prototypes.cathmhaol.com/sortedtable-jquery/)
