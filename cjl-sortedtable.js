@@ -242,8 +242,24 @@
 
     // assigns handlers
     function assignHandler($cell) {
-      $cell.on('click', cellClicked);
       $cell.addClass('sorter');
+      $cell.attr('tabindex', 0);
+      $cell.on('click', cellClicked);
+      $cell.on('keypress', cellKeyed);
+    }
+
+    // reattaches the headerless body handlers
+    function bodyHandlers() {
+      var rows;
+
+      if (!ME.head.length) {
+        rows = ME.body.children('tr');
+        rows.each(function() {
+            $(this).children('td').each(function(index) {
+                assignHandler($(this));
+              });
+          });
+      }
     }
 
     // click handler for a table cell
@@ -258,17 +274,19 @@
       ME.sort({name:$label}, evt.shiftKey);
     }
 
-    // reattaches the headerless body handlers
-    function bodyHandlers() {
-      var rows;
+    // keypress handler for a table cell
+    function cellKeyed(evt) {
+      var $cell = $(this)
+        , $label = $cell.prop('tagName').toLowerCase()
+        , $key = evt.which
+      ;
 
-      if (!ME.head.length) {
-        rows = ME.body.children('tr');
-        rows.each(function() {
-            $(this).children('td').each(function(index) {
-                assignHandler($(this));
-              });
-          });
+      // do a sort if the key entered is enter (13) or space (32)
+      if ($key === 13 || $key === 32) {
+        $label = ($label === 'th') ? $cell.text() : 'col_' + $cell.index();
+        evt.preventDefault();
+        evt.stopPropagation();
+        ME.sort({name:$label}, evt.shiftKey);
       }
     }
 
@@ -412,6 +430,9 @@
               'top:-0.75em;' +
               'border-bottom:0.5em solid ' + INDICATOR_COLOR + ';' +
               'border-top:0 solid transparent;' +
+            '}' +
+            '.cjl-sortable .sorter {' +
+              'overflow-y:hidden;' +
             '}' +
            '</style>'
           );
