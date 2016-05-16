@@ -33,7 +33,7 @@ Creates a sorted (and sortable) table directly from markup, enabling the develop
 - ***string* *instance*.toHtml([*boolean* bodyOnly])**: Returns the complete table, or the table body only (without header and footer), as a string.
 
 ##### Examples
-- var airports = $('#airports').sortedtable({sortOn:[{name:'Country', dir:'ascending'}, {name:'City', dir:1}]});
+- var airports = $('#airports').sortedtable([{name:'Country', dir:'ascending'}, {name:'City', dir:1}]);
 
 #### Requires:
 - jquery
