@@ -240,22 +240,22 @@
       return s.join('\n');
     };
 
-    // click handler for a table cell
-    function cellClicked(evt) {
-      var $cell = $(this);
-
-      evt.preventDefault();
-      evt.stopPropagation();
-      ME.sort({name:'col_' + $cell.index()}, evt.shiftKey);
+    // assigns handlers
+    function assignHandler($cell) {
+      $cell.on('click', cellClicked);
+      $cell.addClass('sorter');
     }
 
-    // click handler for the column(s)
-    function columnClicked(evt) {
-      var $col = $(this);
+    // click handler for a table cell
+    function cellClicked(evt) {
+      var $cell = $(this)
+        , $label = $cell.prop('tagName').toLowerCase()
+      ;
 
+      $label = ($label === 'th') ? $cell.text() : 'col_' + $cell.index();
       evt.preventDefault();
       evt.stopPropagation();
-      ME.sort({name:$col.text()}, evt.shiftKey);
+      ME.sort({name:$label}, evt.shiftKey);
     }
 
     // reattaches the headerless body handlers
@@ -266,9 +266,7 @@
         rows = ME.body.children('tr');
         rows.each(function() {
             $(this).children('td').each(function(index) {
-                var $cell = $(this);
-                $cell.on('click', cellClicked);
-                $cell.addClass('sorter');
+                assignHandler($(this));
               });
           });
       }
@@ -332,8 +330,7 @@
               $col.append('<span class="indicator"></span>');
 
               // add the sort handler
-              $col.on('click', columnClicked);
-              $col.addClass('sorter');
+              assignHandler($col);
 
               // disable selection of the column
               $col.attr('unselectable', 'on')
