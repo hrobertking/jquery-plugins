@@ -242,7 +242,13 @@
 
     // assigns handlers
     function assignHandler($cell) {
+      var $label = $cell.prop('tagName').toLowerCase();
+
+      $label = ($label === 'th') ? $cell.text() : 'column ' + $cell.index();
+
       $cell.addClass('sorter');
+      $cell.attr('aria-label', 'Sort by ' + $label);
+      $cell.attr('role', 'button');
       $cell.attr('tabindex', 0);
       $cell.on('click', cellClicked);
       $cell.on('keypress', cellKeyed);
@@ -410,6 +416,8 @@
             '<style id="cjl-sortable-style" type="text/css">' +
             '.cjl-sortable .sorter {' +
               'cursor:pointer;' +
+              'overflow-y:hidden;' +
+              'text-align:left;' +
             '}' +
             '.cjl-sortable .indicator {' +
               'height:0;' +
@@ -430,9 +438,6 @@
               'top:-0.75em;' +
               'border-bottom:0.5em solid ' + INDICATOR_COLOR + ';' +
               'border-top:0 solid transparent;' +
-            '}' +
-            '.cjl-sortable .sorter {' +
-              'overflow-y:hidden;' +
             '}' +
            '</style>'
           );
