@@ -62,7 +62,7 @@
       var c
         , sort_keys = (this.elem.attr('data-sort') || '').split(',')
         , parsed
-        , pattern = /^([\w\-]+)([\+\-])$/
+        , pattern = /^\s*([\w\-]+)([\+\-])\s*$/
         , ret = [ ]
       ;
 
@@ -272,9 +272,10 @@
     function cellClicked(evt) {
       var $cell = $(this)
         , $label = $cell.prop('tagName').toLowerCase()
+        , $text = $cell.text()
       ;
 
-      $label = ($label === 'th') ? $cell.text() : 'col_' + $cell.index();
+      $label = ($label === 'th' && $text) ? $text : 'col_' + $cell.index();
       evt.preventDefault();
       evt.stopPropagation();
       ME.sort({name:$label}, evt.shiftKey);
@@ -283,13 +284,14 @@
     // keypress handler for a table cell
     function cellKeyed(evt) {
       var $cell = $(this)
-        , $label = $cell.prop('tagName').toLowerCase()
         , $key = evt.which
+        , $label = $cell.prop('tagName').toLowerCase()
+        , $text = $cell.text()
       ;
 
       // do a sort if the key entered is enter (13) or space (32)
       if ($key === 13 || $key === 32) {
-        $label = ($label === 'th') ? $cell.text() : 'col_' + $cell.index();
+        $label = ($label === 'th' && $text) ? $text : 'col_' + $cell.index();
         evt.preventDefault();
         evt.stopPropagation();
         ME.sort({name:$label}, evt.shiftKey);
@@ -376,6 +378,7 @@
                   , $cell = $(this)
                 ;
 
+                colName = colName || 'col_' + index;
                 obj = obj || { };
                 obj[colName] = $cell.text();
                 propCount += 1;
@@ -452,6 +455,9 @@
               , $colName = $col.text()
               , index
             ;
+
+            // use the default property name if the column heading is blank
+            $colName = $colName || 'col_' + index;
 
             // remove any existing identifiers
             $col.removeClass('sorted-asc');
