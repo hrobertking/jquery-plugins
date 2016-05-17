@@ -112,7 +112,7 @@
       ;
 
       // make sure sortOn is an array
-      sortOn = ($.isArray(sortOn)) ? sortOn : [sortOn];
+      sortOn = ($.isArray(sortOn)) ? sortOn : (sortOn ? [sortOn] : [ ]);
 
       // get any existing sort order
       this.getSortAttribute();
@@ -478,7 +478,7 @@
     parse();
 
     // sort according to order specified in markup
-    ME.sort(sortkeys);
+    ME.sort(sortkeys, true);
 
     // return the extended jquery object
     return ME;
