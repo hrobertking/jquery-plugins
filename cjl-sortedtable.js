@@ -170,7 +170,28 @@
               , compareA
               , compareB
               , isfirst = 0
+              , ipv4 = /^(\d+)\.(\d+)\.(\d+)\.(\d+)(\:\d+)?$/
             ;
+
+            function ipv4normalized(match, p1, p2, p3, p4, p5, offset, string) {
+              var s = [ ]
+                , c
+              ;
+
+              // normalize the IPv4 address
+              s.push(('000'+p1).substr(-3));
+              s.push(('000'+p2).substr(-3));
+              s.push(('000'+p3).substr(-3));
+              s.push(('000'+p4).substr(-3));
+              s = s.join('.');
+
+              // normalize the port
+              if (p5) {
+                s += ':' + ('00000'+p5.replace(/\:/, '')).substr(-5);
+              }
+
+              return s;
+            }
 
             while (c < sort_keys.length && isfirst === 0) {
               compareA = a[sort_keys[c].name];
@@ -180,6 +201,9 @@
               if (!isNaN(compareA) && !isNaN(compareB)) {
                 compareA = compareA * 1;
                 compareB = compareB * 1;
+              } else if (ipv4.test(compareA) && ipv4.test(compareB)) {
+                compareA = compareA.replace(ipv4, ipv4normalized);
+                compareB = compareB.replace(ipv4, ipv4normalized);
               }
 
               // return the order based on the compared values
