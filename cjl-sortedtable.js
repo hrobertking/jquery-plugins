@@ -171,6 +171,7 @@
               , compareB
               , isfirst = 0
               , ipv4 = /^(\d+)\.(\d+)\.(\d+)\.(\d+)(\:\d+)?$/
+              , hex = /^[a-f0-9]{1,}$/i
             ;
 
             function ipv4normalized(match, p1, p2, p3, p4, p5, offset, string) {
@@ -197,13 +198,16 @@
               compareA = a[sort_keys[c].name];
               compareB = b[sort_keys[c].name];
 
-              // if A and B are numbers, cast them as numbers
+              // convert A and B if they're a special type
               if (!isNaN(compareA) && !isNaN(compareB)) {
                 compareA = compareA * 1;
                 compareB = compareB * 1;
               } else if (ipv4.test(compareA) && ipv4.test(compareB)) {
                 compareA = compareA.replace(ipv4, ipv4normalized);
                 compareB = compareB.replace(ipv4, ipv4normalized);
+              } else if (hex.test(compareA.replace(/\s/g, '')) && hex.test(compareB.replace(/\s/g, ''))) {
+                compareA = parseInt(compareA, 16);
+                compareB = parseInt(compareB, 16);
               }
 
               // return the order based on the compared values
