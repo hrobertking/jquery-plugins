@@ -287,7 +287,12 @@
         rows = ME.body.children('tr');
         rows.each(function() {
             $(this).children('td').each(function(index) {
-                assignHandler($(this));
+                var $col = $(this);
+
+                if (!checkExclude($col)) {
+                  // add the sort handler
+                  assignHandler($col);
+                }
               });
           });
       }
@@ -423,6 +428,9 @@
                 var colName = (ME.cols[index] || '').length ? ME.cols[index].text() : 'col_' + index
                   , $cell = $(this)
                 ;
+
+                // check to see if we should be excluding it from the sort order
+                checkExclude($cell);
 
                 colName = colName || 'col_' + index;
                 obj = obj || { };
