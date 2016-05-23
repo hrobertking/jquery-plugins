@@ -194,7 +194,10 @@
               compareB = b[sort_keys[c].name];
 
               // convert A and B if they're a special type
-              if (!isNaN(compareA) && !isNaN(compareB)) {
+              if (compareA === undefined || compareB === undefined) {
+                c += 1;
+                continue;
+              } else if (!isNaN(compareA) && !isNaN(compareB)) {
                 compareA = compareA * 1;
                 compareB = compareB * 1;
               } else if (ipv4.test(compareA) && ipv4.test(compareB)) {
