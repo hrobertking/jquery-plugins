@@ -18,7 +18,7 @@ The table sort order can be specified in the markup by providing the `data-sort`
 
 Columns can be excluded from the sort order by either specifying an array of column names in the `settings` object array property `exclude`, e.g., {exclude:['Email', 'Telephone']} or in the markup by providing the `data-sort-exclude` attribute for the column and setting it to "true", e.g., &lt;th data-sort-exclude="true"&gt;Email&lt;/th&gt; or by setting the `data-sort-exclude` attribute on the table to a comma-separated list, e.g., &lt;table id="contacts" data-sort-exclude="Email, Telephone"&gt;.
 
-Columns to be used in sorting may be identified in the the constructor either as an object array, $('#contacts').sortedtable([{name:'Surname'}, {name:'Given Name', dir:'descending'}]) or as a property of the `settings` object, e.g, $('#contacts').sortedtable({sort:[{name:'Surname'}, {name:'Given Name', dir:'descending'}], exclude:exclude:['Email', 'Telephone']})
+Columns to be used in sorting may be identified in the the constructor either as an object array, $('#contacts').sortedtable([{name:'Surname'}, {name:'Given Name', dir:'descending'}]) or as a property of the `settings` object, e.g, $('#contacts').sortedtable({sort:[{name:'Surname'}, {name:'Given Name', dir:'descending'}], exclude:['Email', 'Telephone']})
 
 #### Syntax:
 *object* $(*selector*).sortedtable([*object[]* keys])  
@@ -28,7 +28,6 @@ Columns to be used in sorting may be identified in the the constructor either as
 - ***object* *instance*.body**: The table body
 - ***integer* *instance*.colCount**: The count of columns in the table
 - ***object[]* *instance*.cols**: Names of columns in the table, defaults to col_{index}
-- ***object[]* *instance*.data**: Array of objects representing table rows
 - ***string* *instance*.foot**: The table footer
 - ***string* *instance*.head**: The table header
 - ***node* *instance*.elem**: jQuery element reference to table
