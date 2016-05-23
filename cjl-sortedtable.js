@@ -162,6 +162,7 @@
       if (sort_keys.length) {
         DATA.sort(function(a, b) {
             var c = 0
+              , col
               , compareA
               , compareB
               , isfirst = 0
@@ -190,31 +191,36 @@
             }
 
             while (c < sort_keys.length && isfirst === 0) {
-              compareA = a[sort_keys[c].name];
-              compareB = b[sort_keys[c].name];
+              col = sort_keys[c].name;
 
-              // convert A and B if they're a special type
-              if (compareA === undefined || compareB === undefined) {
-                c += 1;
-                continue;
-              } else if (!isNaN(compareA) && !isNaN(compareB)) {
-                compareA = compareA * 1;
-                compareB = compareB * 1;
-              } else if (ipv4.test(compareA) && ipv4.test(compareB)) {
-                compareA = compareA.replace(ipv4, ipv4normalized);
-                compareB = compareB.replace(ipv4, ipv4normalized);
-              } else if (hex.test(compareA.replace(/\s/g, '')) && hex.test(compareB.replace(/\s/g, ''))) {
-                compareA = parseInt(compareA, 16);
-                compareB = parseInt(compareB, 16);
-              }
+              // use the sort key if it's not excluded
+              if ($.inArray(col, settings.exclude) < 0) {
+                compareA = a[col];
+                compareB = b[col];
 
-              // return the order based on the compared values
-              if (compareA > compareB) {
-                isfirst = (sort_keys[c].dir || 1) * 1;
-              } else if (compareA < compareB) {
-                isfirst = (sort_keys[c].dir || 1) * -1;
-              } else {
-                c += 1;
+                // convert A and B if they're a special type
+                if (compareA === undefined || compareB === undefined) {
+                  c += 1;
+                  continue;
+                } else if (!isNaN(compareA) && !isNaN(compareB)) {
+                  compareA = compareA * 1;
+                  compareB = compareB * 1;
+                } else if (ipv4.test(compareA) && ipv4.test(compareB)) {
+                  compareA = compareA.replace(ipv4, ipv4normalized);
+                  compareB = compareB.replace(ipv4, ipv4normalized);
+                } else if (hex.test(compareA.replace(/\s/g, '')) && hex.test(compareB.replace(/\s/g, ''))) {
+                  compareA = parseInt(compareA, 16);
+                  compareB = parseInt(compareB, 16);
+                }
+
+                // return the order based on the compared values
+                if (compareA > compareB) {
+                  isfirst = (sort_keys[c].dir || 1) * 1;
+                } else if (compareA < compareB) {
+                  isfirst = (sort_keys[c].dir || 1) * -1;
+                } else {
+                  c += 1;
+                }
               }
             }
             return isfirst;
@@ -330,17 +336,29 @@
 
     // add the item to the excluded array if we need to add it
     function checkExclude($cell) {
-      var $label = $cell.prop('tagName').toLowerCase()
+      var $label
         , $exclude = false
       ;
 
-      $label = ($label === 'th') ? $cell.text() : 'column ' + $cell.index();
-      $exclude = ($cell.attr('data-sort-exclude') || '').toLowerCase() === 'true';
-      if ($.inArray($label, settings.exclude) < 0 && $exclude) {
-        settings.exclude.push($label);
+      // if the function is called with a string, automatically exclude it
+      if (typeof $cell === 'string') {
+        $label = $cell;
+        $exclude = true;
+      } else {
+        $label = $cell.prop('tagName').toLowerCase();
+        $label = ($label === 'th') ? $cell.text() : 'column ' + $cell.index();
+        $exclude = ($cell.attr('data-sort-exclude') || '').toLowerCase() === 'true';
       }
 
-      return ($.inArray($label, settings.exclude) > -1);
+      if ($label) {
+        // add the column if we need to exclude it
+        if ($.inArray($label, settings.exclude) < 0 && $exclude) {
+          settings.exclude.push($label);
+        }
+
+        return ($.inArray($label, settings.exclude) > -1);
+      }
+      return false;
     }
 
     // this returns all the markup of the provided node
@@ -360,6 +378,7 @@
 
       var $tbl_th = ME.elem.find('th:first').parent()
         , $snippet
+        , index
       ;
 
       ME.body = ME.elem.children('tbody').children('tr');
@@ -367,6 +386,12 @@
 
       // only do something when we have a table to parse
       if (ME.body.length) {
+        // set any excluded sort columns
+        $snippet = (ME.elem.attr('data-sort-exclude') || '').split(',');
+        for (index = 0; index < $snippet.length; index += 1) {
+          checkExclude($snippet[index]);
+        }
+
         // set the header
         if (!ME.head.length && $tbl_th.length) {
           // get the html of the header row and wrap it in a thead
@@ -530,7 +555,7 @@
             // check to see if the column is in the sort keys
             for (index = 0; index < $keys.length; index += 1) {
               $key = $keys[index];
-              if ($colName === $key.name) {
+              if ($colName === $key.name && $.inArray($colName, settings.exclude) < 0) {
                 $col.addClass('sorted-' + ($key.dir === 1 ? 'asc' : 'desc'));
               }
             }
