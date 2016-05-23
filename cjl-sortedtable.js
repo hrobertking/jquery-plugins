@@ -2,7 +2,7 @@
  * 
  */
 (function($) {
-  $.fn.sortedtable = function(sortkeys) {
+  $.fn.sortedtable = function(config) {
     /**
      * @property {object} body       - jQuery selection
      */
@@ -508,11 +508,20 @@
       , INDICATOR_COLOR = 'rgb(0, 0, 0)'
     ;
 
+    // handle a config object
+    if ($.isArray(config)) {
+      config = { sortkeys:config };
+    } else {
+      config = config || { };
+    }
+
     // initialize
     parse();
 
-    // sort according to order specified in markup
-    ME.sort(sortkeys, true);
+    // sort according to order specified in the call
+    if ($.isArray(config.sortkeys)) {
+      ME.sort(config.sortkeys, true);
+    }
 
     // return the extended jquery object
     return ME;
