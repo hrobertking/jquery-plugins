@@ -342,7 +342,7 @@
 
       // if the function is called with a string, automatically exclude it
       if (typeof $cell === 'string') {
-        $label = $cell;
+        $label = $cell.replace(/^\s*|\s*$/g, '');
         $exclude = true;
       } else {
         $label = $cell.prop('tagName').toLowerCase();
