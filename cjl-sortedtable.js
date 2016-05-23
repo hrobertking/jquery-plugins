@@ -19,11 +19,6 @@
     this.cols = [ ];
 
     /**
-     * @property {object[]} data     - Array of objects representing table rows
-     */
-    this.data = [ ];
-
-    /**
      * @property {string} foot       - HTML containing table footer
      */
     this.foot = null;
@@ -165,7 +160,7 @@
 
       // only perform a sort if we have sort keys
       if (sort_keys.length) {
-        ME.data.sort(function(a, b) {
+        DATA.sort(function(a, b) {
             var c = 0
               , compareA
               , compareB
@@ -256,8 +251,8 @@
       }
 
       // loop through the data for the body
-      for (i = 0; i < ME.data.length; i += 1) {
-        s.push(ME.data[i].html);
+      for (i = 0; i < DATA.length; i += 1) {
+        s.push(DATA[i].html);
       }
 
       if (!bodyOnly) {
@@ -414,7 +409,7 @@
 
             if (obj) {
               obj.html = outerHtml($(this));
-              ME.data.push(obj);
+              DATA.push(obj);
               ME.colCount = Math.max(ME.colCount, propCount);
             }
           });
@@ -505,7 +500,8 @@
     }
 
     var ME = this
-      , INDICATOR_COLOR = 'rgb(0, 0, 0)'
+      , INDICATOR_COLOR = 'rgb(0, 0, 0)'  // Color of the text in the header, used as the color for the up/down arrow
+      , DATA = [ ]                        // Array of objects representing table rows
     ;
 
     // handle a config object
