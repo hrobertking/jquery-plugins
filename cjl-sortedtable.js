@@ -269,7 +269,6 @@
 
       $label = ($label === 'th') ? $cell.text() : 'column ' + $cell.index();
 
-      $cell.addClass('sorter');
       $cell.attr('aria-label', 'Sort by ' + $label);
       $cell.attr('role', 'button');
       $cell.attr('tabindex', 0);
@@ -319,6 +318,21 @@
         evt.stopPropagation();
         ME.sort({name:$label}, evt.shiftKey);
       }
+    }
+
+    // add the item to the excluded array if we need to add it
+    function checkExclude($cell) {
+      var $label = $cell.prop('tagName').toLowerCase()
+        , $exclude = false
+      ;
+
+      $label = ($label === 'th') ? $cell.text() : 'column ' + $cell.index();
+      $exclude = ($cell.attr('data-sort-exclude') || '').toLowerCase() === 'true';
+      if ($.inArray($label, settings.exclude) < 0 && $exclude) {
+        settings.exclude.push($label);
+      }
+
+      return ($.inArray($label, settings.exclude) > -1);
     }
 
     // this returns all the markup of the provided node
@@ -378,8 +392,14 @@
               // add the sort indicator
               $col.append('<span class="indicator"></span>');
 
-              // add the sort handler
-              assignHandler($col);
+              // handle exclusion
+              if (!checkExclude($col)) {
+                // add the sort handler
+                assignHandler($col);
+                $col.addClass('sorter');
+              } else {
+                $col.addClass('sorter disabled');
+              }
 
               // disable selection of the column
               $col.attr('unselectable', 'on')
@@ -442,8 +462,18 @@
             '<style id="cjl-sortable-style" type="text/css">' +
             '.cjl-sortable .sorter {' +
               'cursor:pointer;' +
+              'font-weight:bold;' +
               'overflow-y:hidden;' +
               'text-align:left;' +
+            '}' +
+            '.cjl-sortable .sorter:hover {' +
+              'outline:2px auto -webkit-focus-ring-color;' +
+            '}' +
+            '.cjl-sortable .sorter.disabled {' +
+              'font-weight:normal;' +
+            '}' +
+            '.cjl-sortable .sorter.disabled:hover {' +
+              'outline:none;' +
             '}' +
             '.cjl-sortable .indicator {' +
               'height:0;' +
@@ -500,23 +530,30 @@
     }
 
     var ME = this
-      , INDICATOR_COLOR = 'rgb(0, 0, 0)'  // Color of the text in the header, used as the color for the up/down arrow
-      , DATA = [ ]                        // Array of objects representing table rows
+      , INDICATOR_COLOR = 'rgb(0, 0, 0)'         // Color of the text in the header, used as the color for the up/down arrow
+      , DATA = [ ]                               // Array of objects representing table rows
+      , settings                                 // The settings passed in to the object
+      , keys = [ ]                               // Object array containing sort order
     ;
 
-    // handle a config object
+    // handle an array passed in instead of an object
     if ($.isArray(config)) {
-      config = { sortkeys:config };
-    } else {
-      config = config || { };
+      keys = config;
+      config = { };
     }
+
+    // initialize the settings
+    settings = $.extend({
+        sort: keys,
+        exclude: [ ]
+      }, config);
 
     // initialize
     parse();
 
     // sort according to order specified in the call
-    if ($.isArray(config.sortkeys)) {
-      ME.sort(config.sortkeys, true);
+    if ($.isArray(settings.sort)) {
+      ME.sort(settings.sort, true);
     }
 
     // return the extended jquery object
