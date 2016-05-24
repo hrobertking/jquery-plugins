@@ -9,16 +9,6 @@
     this.body = null;
 
     /**
-     * @property {integer} colCount  - Count of columns in the table
-     */
-    this.colCount = 0;
-
-    /**
-     * @property {object[]} cols     - Names of columns in the table, defaults to col_{index}
-     */
-    this.cols = [ ];
-
-    /**
      * @property {string} foot       - HTML containing table footer
      */
     this.foot = null;
@@ -34,60 +24,13 @@
     this.elem = $(this);
 
     /**
-     * @property {object[]} sorts    - Sort keys. Object contains 'name' and 'dir', which is 1 (ascending) or -1 (descending)
-     */
-    this.sorts = [ ];
-
-    /**
      * Clears the sort keys
      * @returns {void}
      * @function clearSort
      */
     this.clearSort = function() {
-      this.sorts = [ ];
-      this.setSortAttribute();
-    };
-
-    /**
-     * Sets the object array containing sort keys
-     * @returns {void}
-     * @function getSortAttribute
-     */
-    this.getSortAttribute = function() {
-      var c
-        , sort_keys = (this.elem.attr('data-sort') || '').split(',')
-        , parsed
-        , pattern = /^\s*([\w\-]+)([\+\-])\s*$/
-        , ret = [ ]
-      ;
-
-      for (c = 0; c < sort_keys.length; c += 1) {
-        parsed = pattern.exec(sort_keys[c])
-        if (parsed) {
-          ret.push({name:parsed[1], dir:(/^(asc|\+)/i).test(parsed[2]) ? 1 : -1});
-        }
-      }
-
-      // update the sort keys array
-      ME.sorts = ret;
-    };
-
-    /**
-     * Sets the data-sort attribute on the table using the sort keys
-     * @returns {void}
-     * @function setSortAttribute
-     */
-    this.setSortAttribute = function() {
-      var c
-        , s = [ ]
-      ;
-
-      for (c = 0; c < ME.sorts.length; c += 1) {
-        s.push(ME.sorts[c].name + (ME.sorts[c].dir === 1 ? '+' : '-'));
-      }
-
-      // update the sort indicator
-      ME.elem.attr('data-sort', s.join(','));
+      SORTS = [ ];
+      setSortAttribute();
     };
 
     /**
@@ -110,8 +53,8 @@
       sortOn = ($.isArray(sortOn)) ? sortOn : (sortOn ? [sortOn] : [ ]);
 
       // get any existing sort order
-      this.getSortAttribute();
-      sort_keys = ME.sorts;
+      getSortAttribute();
+      sort_keys = SORTS;
 
       // set sort keys
       if (!retain) {
@@ -125,7 +68,7 @@
           for (counter = 0; counter < sort_keys.length; counter += 1) {
             if (key.name === sort_keys[counter].name) {
               if (retain) {
-                ME.sorts[counter].dir *= -1;
+                SORTS[counter].dir *= -1;
                 is_set = true;
                 break;
               } else {
@@ -147,7 +90,7 @@
             }
 
             // add the sort key to the collection
-            ME.sorts.push({
+            SORTS.push({
                 name: key.name,
                 dir: ord
               });
@@ -156,7 +99,7 @@
       }
 
       // assign a local variable for scope
-      sort_keys = ME.sorts;
+      sort_keys = SORTS;
 
       // only perform a sort if we have sort keys
       if (sort_keys.length) {
@@ -227,13 +170,13 @@
           });
 
         // only render if we've change the order
-        ME.body.html(ME.toHtml(true));
+        ME.body.html(renderBody());
 
         // reattach the click handlers since we've reset the elements
         bodyHandlers();
 
         // set the data attribute to maintain sort keys
-        ME.setSortAttribute();
+        setSortAttribute();
 
         // set the sorted class
         setSortedClass();
@@ -241,42 +184,15 @@
     };
 
     /**
-     * Returns the HTML of the table as a string
-     * @returns {string}
-     * @function toHtml
-     * @param {boolean} bodyOnly     - Return only the body of the table, without header and footer
+     * Assigns handlers for sorting
+     * @returns {void}
+     * @param {JQuerySelection} $cell
      */
-    this.toHtml = function(bodyOnly) {
-      var c
-        , i
-        , n
-        , s = [ ]
-        , t
-      ;
-
-      if (!bodyOnly) {
-        // add the header
-        s.push(outerHtml(ME.head));
-      }
-
-      // loop through the data for the body
-      for (i = 0; i < DATA.length; i += 1) {
-        s.push(DATA[i].html);
-      }
-
-      if (!bodyOnly) {
-        // add the foot
-        s.push(outerHtml(ME.foot));
-      }
-
-      return s.join('\n');
-    };
-
-    // assigns handlers
     function assignHandler($cell) {
       var $label = $cell.prop('tagName').toLowerCase();
 
       $label = ($label === 'th') ? $cell.text() : 'column ' + $cell.index();
+      $label = ($label || 'column ' + ($cell.index() + 1));
 
       $cell.attr('aria-label', 'Sort by ' + $label);
       $cell.attr('role', 'button');
@@ -285,7 +201,10 @@
       $cell.on('keypress', cellKeyed);
     }
 
-    // reattaches the headerless body handlers
+    /**
+     * Reattaches handlers to TD nodes after nodes have been replaced
+     * @returns {void}
+     */
     function bodyHandlers() {
       var rows;
 
@@ -304,7 +223,11 @@
       }
     }
 
-    // click handler for a table cell
+    /**
+     * The click handler for a table cell
+     * @returns {void}
+     * @param {Event} evt
+     */
     function cellClicked(evt) {
       var $cell = $(this)
         , $label = $cell.prop('tagName').toLowerCase()
@@ -317,7 +240,11 @@
       ME.sort({name:$label}, evt.shiftKey);
     }
 
-    // keypress handler for a table cell
+    /**
+     * The keypress handler for a table cell
+     * @returns {void}
+     * @param {Event} evt
+     */
     function cellKeyed(evt) {
       var $cell = $(this)
         , $key = evt.which
@@ -334,7 +261,11 @@
       }
     }
 
-    // add the item to the excluded array if we need to add it
+    /**
+     * Adds the item to the excluded array if it is not already tracked
+     * @returns {void}
+     * @param {string|JQuerySelection} $cell
+     */
     function checkExclude($cell) {
       var $label
         , $exclude = false
@@ -361,16 +292,65 @@
       return false;
     }
 
-    // this returns all the markup of the provided node
-    function outerHtml(htmlNode) {
+    /**
+     * Reads the number of columns in the table
+     * @returns {integer}
+     */
+    function getColumnCount() {
+      var cols = 0;
+
+      ME.elem.children('tbody').children('tr').each(function(){
+          var inrow = 0;
+          $(this).children('td').each(function(){
+              var colSpan = $(this).attr('colspan');
+              inrow += (colSpan || 1);
+            });
+          cols = Math.max(cols, inrow);
+        });
+
+      return cols;
+    }
+
+    /**
+     * Sets the object array containing sort keys
+     * @returns {void}
+     */
+    function getSortAttribute() {
+      var c
+        , sort_keys = (ME.elem.attr('data-sort') || '').split(',')
+        , parsed
+        , pattern = /^\s*([\w\-]+)([\+\-])\s*$/
+        , ret = [ ]
+      ;
+
+      for (c = 0; c < sort_keys.length; c += 1) {
+        parsed = pattern.exec(sort_keys[c])
+        if (parsed) {
+          ret.push({name:parsed[1], dir:(/^(asc|\+)/i).test(parsed[2]) ? 1 : -1});
+        }
+      }
+
+      // update the sort keys array
+      SORTS = ret;
+    }
+
+    /**
+     * Returns all the markup of the provided node
+     * @returns {string}
+     * @param {JQuerySelection} $node
+     */
+    function outerHtml($node) {
       var markup = '';
-      if (htmlNode && htmlNode.length) {
-        markup = $('<div />').append(htmlNode.clone()).html();
+      if ($node && $node.length) {
+        markup = $('<div />').append($node.clone()).html();
       }
       return markup.replace(/\>\s*\</g, '><');
     }
 
-    // reads the table into a dataset
+    /**
+     * Reads the table markup into a dataset and sort instructions
+     * @returns {void}
+     */
     function parse() {
       // table rows are contained by a thead, tbody, or tfoot
       // rows not contained are put in a virtual tbody so check
@@ -393,16 +373,25 @@
         }
 
         // set the header
-        if (!ME.head.length && $tbl_th.length) {
-          // get the html of the header row and wrap it in a thead
-          $snippet = '<thead>' + outerHtml($tbl_th) + '</thead>';
-          // remove the header row from the body
-          ME.body.each(function() {
-              // if the header is in the body, drop it
-              if ($(this).is($tbl_th)) {
-                $tbl_th.remove();
-              }
-            });
+        if (!ME.head.length) {
+          if ($tbl_th.length) {
+            // get the html of the header row and wrap it in a thead
+            $snippet = '<thead>' + outerHtml($tbl_th) + '</thead>';
+            // remove the header row from the body
+            ME.body.each(function() {
+                // if the header is in the body, drop it
+                if ($(this).is($tbl_th)) {
+                  $tbl_th.remove();
+                }
+              });
+          } else {
+            $snippet = '<thead>';
+            for (index = getColumnCount(); index > 0; index -= 1) {
+              $snippet += '<th></th>';
+            }
+            $snippet += '</thead>';
+          }
+
           // append the new header row to the table and reset the header
           ME.elem.prepend($snippet);
           ME.head = ME.elem.children('thead');
@@ -417,7 +406,7 @@
               var $col = $(this);
 
               // add the column to the columns collection
-              ME.cols.push($col);
+              COLS.push($col);
 
               // set the sort indicator color
               INDICATOR_COLOR = $col.css('color');
@@ -439,7 +428,7 @@
                   .css('user-select', 'none')
                   .on('selectstart', false);
             });
-          ME.colCount = ME.cols.length;
+          COL_COUNT = COLS.length;
         }
 
         // create the dataset to be sorted
@@ -450,7 +439,7 @@
 
             $(this).children('td').each(function(index) {
                 // default the column name to the zero-based index
-                var colName = (ME.cols[index] || '').length ? ME.cols[index].text() : 'col_' + index
+                var colName = (COLS[index] || '').length ? COLS[index].text() : 'col_' + index
                   , $cell = $(this)
                 ;
 
@@ -466,7 +455,7 @@
             if (obj) {
               obj.html = outerHtml($(this));
               DATA.push(obj);
-              ME.colCount = Math.max(ME.colCount, propCount);
+              COL_COUNT = Math.max(COL_COUNT, propCount);
             }
           });
 
@@ -478,14 +467,49 @@
     }
 
     /**
+     * Returns the HTML of the table body string
+     * @returns {string}
+     */
+    function renderBody() {
+      var i
+        , s = [ ]
+      ;
+
+      // loop through the data for the body
+      for (i = 0; i < DATA.length; i += 1) {
+        s.push(DATA[i].html);
+      }
+
+      return s.join('\n');
+    }
+
+    /**
+     * Sets the data-sort attribute on the table using the sort keys
+     * @returns {void}
+     */
+    function setSortAttribute() {
+      var c
+        , s = [ ]
+      ;
+
+      for (c = 0; c < SORTS.length; c += 1) {
+        s.push(SORTS[c].name + (SORTS[c].dir === 1 ? '+' : '-'));
+      }
+
+      // update the sort indicator
+      ME.elem.attr('data-sort', s.join(','));
+    }
+
+    /**
      * Sets the class on sorted columns, i.e., 'sorted' and 'asc' or 'desc'
+     * @returns {void}
      */
     function setSortedClass() {
       // loop through the columns in the header and remove the 'sorted' and 'asc'|'desc' class
-      // add the appropriate class(es) if the column has a sort key in ME.sorts
+      // add the appropriate class(es) if the column has a sort key in SORTS
       var $head = $(ME.head)
         , $key = null
-        , $keys = ME.sorts
+        , $keys = SORTS
         , $style = $('#cjl-sortable-style')
         , $tr
       ;
@@ -499,7 +523,8 @@
             '.cjl-sortable .sorter {' +
               'cursor:pointer;' +
               'font-weight:bold;' +
-              'overflow-y:hidden;' +
+              'height:1.2em;' +
+              'overflow:hidden;' +
               'text-align:left;' +
             '}' +
             '.cjl-sortable .sorter:hover {' +
@@ -512,6 +537,8 @@
               'outline:none;' +
             '}' +
             '.cjl-sortable .indicator {' +
+              'display:inline-block;' +
+              'float:right;' +
               'height:0;' +
               'margin-left:0.5em;' +
               'position:relative;' +
@@ -522,12 +549,12 @@
               'border-top:none;' +
             '}' +
             '.cjl-sortable .sorted-asc .indicator {' +
-              'top:0.75em;' +
+              'top:0.2em;' +
               'border-bottom:0 solid transparent;' +
               'border-top:0.5em solid ' + INDICATOR_COLOR + ';' +
             '}' +
             '.cjl-sortable .sorted-desc .indicator {' +
-              'top:-0.75em;' +
+              'top:0.3em;' +
               'border-bottom:0.5em solid ' + INDICATOR_COLOR + ';' +
               'border-top:0 solid transparent;' +
             '}' +
@@ -546,7 +573,7 @@
             ;
 
             // use the default property name if the column heading is blank
-            $colName = $colName || 'col_' + index;
+            $colName = $colName || 'col_' + $col.index();
 
             // remove any existing identifiers
             $col.removeClass('sorted-asc');
@@ -568,6 +595,9 @@
     var ME = this
       , INDICATOR_COLOR = 'rgb(0, 0, 0)'         // Color of the text in the header, used as the color for the up/down arrow
       , DATA = [ ]                               // Array of objects representing table rows
+      , COL_COUNT = 0                            // Count of columns
+      , COLS = [ ]                               // Names of columns in the table, defaults to col_{index}
+      , SORTS = [ ]                              // Sort keys. Object contains 'name' and 'dir', which is 1 (ascending) or -1 (descending)
       , settings                                 // The settings passed in to the object
       , keys = [ ]                               // Object array containing sort order
     ;

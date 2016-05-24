@@ -26,19 +26,13 @@ Columns to be used in sorting may be identified in the the constructor either as
 
 ##### Properties
 - ***object* *instance*.body**: The table body
-- ***integer* *instance*.colCount**: The count of columns in the table
-- ***object[]* *instance*.cols**: Names of columns in the table, defaults to col_{index}
 - ***string* *instance*.foot**: The table footer
 - ***string* *instance*.head**: The table header
 - ***node* *instance*.elem**: jQuery element reference to table
 
 ##### Methods
-- ***object[]* *instance*.sorts**: Sort keys. Each object in the array contains `name` and `dir`, which is `ascending` (or 1) or `descending` (or -1). The `dir` property defaults to `ascending`.
 - ***void* *instance*.clearSort**: Clears the sort keys
-- ***void* *instance*.getSortAttribute**: Sets the object array containing sort keys using the data-sort attribute of the table
-- ***void* *instance*.setSortAttribute**: Sets the data-sort attribute on the table using the sort keys
 - ***void* *instance*.sort([*object[]* sortOn[, *boolean* retain]])**: Sorts the data in the table body using the sort keys provided in the data-sort attribute of the table and the <em>sortOn</em> object array (each object in the array should contain a 'name' and 'dir' property, see `*instance*.sorts`), retaining the existing sort order if <em>retain</em> is specified.
-- ***string* *instance*.toHtml([*boolean* bodyOnly])**: Returns the complete table, or the table body only (without header and footer), as a string.
 
 ##### Examples
 - $('#airports').sortedtable([{name:'Country', dir:'descending'}, {name:'City', dir:1}]);
