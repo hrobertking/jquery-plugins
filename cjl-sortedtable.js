@@ -49,6 +49,9 @@
         , sort_keys
       ;
 
+      // trigger an event to indicate start of sort
+      this.trigger('sort');
+
       // make sure sortOn is an array
       sortOn = ($.isArray(sortOn)) ? sortOn : (sortOn ? [sortOn] : [ ]);
 
@@ -181,6 +184,9 @@
         // set the sorted class
         setSortedClass();
       }
+
+      // trigger event indicating sort is complete
+      this.trigger('sorted');
     };
 
     /**

@@ -24,6 +24,10 @@ Columns to be used in sorting may be identified in the the constructor either as
 *object* $(*selector*).sortedtable([*object[]* keys])  
 *object* $(*selector*).sortedtable([*object* settings])
 
+##### Events
+- ***sort*** is fired when data sorting is started. Use `on` to subscribe to the event. Use `this` within the handler to access the table element, e.g. `var $self = $(this); $self.addClass('sorting');`
+- ***sorted*** is fired when data sorting is completed. Use `on` to subscribe to the event. Use `this` within the handler to access the table element, e.g. `var $self = $(this); $self.removeClass('sorting');`
+
 ##### Properties
 - ***object* *instance*.body**: The table body
 - ***string* *instance*.foot**: The table footer
